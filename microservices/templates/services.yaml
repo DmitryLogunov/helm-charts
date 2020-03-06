@@ -1,0 +1,28 @@
+{{- $fullName := include "api-v3.fullname" . -}}
+{{- $name := include "api-v3.name" . -}}
+{{- $chart := include "api-v3.chart" . -}}
+
+{{- range .Values.services }}
+{{- if .enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-v3-{{ .name }}
+  labels:
+    app: {{ $name }}
+    chart: {{ $chart }}
+    release: {{ $.Release.Name }}
+    heritage: {{ $.Release.Service }}
+spec:
+  type: {{ .service.type }}
+  ports:
+    - port: 80
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app: api-v3-{{ .name }}
+    release: {{ $.Release.Name }}
+---
+{{- end }}    
+{{- end }}   

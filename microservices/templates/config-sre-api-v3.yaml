@@ -1,0 +1,87 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "api-v3.fullname" . }}-sre-api-v3-config
+  labels:
+    app: {{ template "api-v3.name" . }}
+    chart: {{ template "api-v3.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+data:
+  config.yaml: |
+    port: 80
+    version: {{ $.Values.servicesSettings.sreApiV3.tag }}
+    prefix: /api/v3
+    logLvl: {{ $.Values.commonSettings.logsLevel }}
+    healtcheck: /
+    reqGuidHeader: request-id
+    authCookie: {{ $.Values.cookieName }}
+    defaultEmail: nonAuth 
+    testMode: {{ $.Values.sreApiV3TestMode }}
+    tokensLogins:
+      {{ $.Values.cmpBotToken }}: cmpbot.local 
+    permissions:
+      notAuthenticated:
+        anyResource: [] 
+        organizations: [GET]
+        sessions: [GET, POST, PATCH, PUT, DELETE]
+        rpc: [GET, POST]
+        users: [GET, PUT]
+      logins:
+        default:
+          anyResource: [GET]
+          attachments: [GET, POST]
+          comments: [GET, POST]
+          maintenances: [GET, PATCH]
+          sessions: [GET, POST, PATCH, PUT, DELETE]
+          files: [GET, POST]
+          rpc: [GET, POST]
+          users: [GET, PUT]
+        dmitry.logunov: 
+          anyResource: [GET, POST, PATCH, DELETE] 
+        konstantin.chirkov: 
+          anyResource: [GET, POST, PATCH, DELETE] 
+        sergey.duma: 
+          anyResource: [GET, POST, PUT, PATCH, DELETE] 
+        vadim.efimov: 
+          anyResource: [GET, POST, PATCH, DELETE]
+        clef.luo:
+          anyResource: [GET, POST, PUT, PATCH, DELETE]
+        dylan.zhang:
+          anyResource: [GET, POST, PUT, PATCH, DELETE]
+        channing.huang:
+          anyResource: [GET, POST, PUT, PATCH, DELETE]
+        anita.wang:
+          anyResource: [GET, POST, PUT, PATCH, DELETE]
+        osostage.service:
+          anyResource: [GET, POST, PATCH, DELETE]
+        cmp.service:
+          anyResource: [GET, POST, PATCH, DELETE]          
+        svetlana.tselikova:
+          anyResource: [GET, POST, PUT, PATCH, DELETE]
+      tokens:
+        default:
+          anyResource: [] 
+        {{ $.Values.rpcServer.token }}:
+          anyResource: [GET, POST, PATCH, DELETE]
+        {{ $.Values.postman.token }}: 
+          anyResource: [GET, POST, PATCH, DELETE]
+    urls:
+      authorization: https://jsonplaceholder.typicode.com/users/2
+      restEndpoints:
+        accounts: http://api-v3-accounts       
+        comments: http://api-v3-comments
+        dictionaries: http://api-v3-dictionaries    
+        sessions:  {{ $.Values.sessionsUrl }}       
+      externalServices: 
+        - sessions 
+      hostServicesPrefix: 'http://api-v3-'
+    sreApiServiceUser: 'sreApiServiceUser:1'    
+    mq: 
+      url: {{ $.Values.rabbitmq.url }}
+      routingKey: {{ $.Values.rabbitmq.routingKey }}
+      exchange: {{ $.Values.rabbitmq.exchange }}
+    modes:
+      authentication: 1
+      authorization: {{ $.Values.commonSettings.authorization }}
+      logNotAuthorizatedRequests: 1

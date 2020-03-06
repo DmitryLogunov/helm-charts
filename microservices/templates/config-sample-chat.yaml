@@ -1,0 +1,22 @@
+{{- $sreApiV3URI :=  printf "\"http://%s.%s\"" "api-v3-sre-api-v3" $.Values.commonSettings.baseDomain -}}
+{{- $webSocketsServerURI :=  printf "\"http://%s.%s\"" "web-sockets" $.Values.commonSettings.baseDomain -}}
+{{- $authorizationAccessToken :=  printf "\"%s\"" $.Values.sessionsServiceToken -}}
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "api-v3.fullname" . }}-sample-chat-config
+  labels:
+    app: {{ template "api-v3.name" . }}
+    chart: {{ template "api-v3.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+data:
+  config.json: |        
+    {
+      "sreApiV3URI": {{ $sreApiV3URI }},
+      "authCookieName": "{{ $.Values.commonSettings.cookieName }}",
+      "authorizationAccessToken": {{ $authorizationAccessToken }},
+      "webSocketServerUrl": "ws://web-sockets.minikube",
+      "debugMode": "false"
+    }          

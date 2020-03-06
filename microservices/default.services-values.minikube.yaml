@@ -1,0 +1,82 @@
+commonSettings:
+  apiVersion: apps/v1
+  baseDomain: minikube
+  logsLevel: debug
+  logsFormat: 1
+  sreApiV3Url: http://sre-api-v3.minikube
+  cookieName: __STAGE_RCOPSOSO__
+  usersip: ''
+  connectionLimit: 30
+
+awsLambda:
+  defaultRoleArn: arn:aws:iam::************:role/service-role/lambdatest
+  vpcConfig:
+    subnetIds:
+      - subnet-************
+      - subnet-************
+      - subnet-************
+      - subnet-************
+    securityGroupIds:
+      - sg-************  
+  layers:
+    binlogDBSyncModules:
+      arn: arn:aws:lambda:us-east-1:************:layer:binlog-db-sync-modules:1
+      codeSize: 621588   
+
+servicesSettings:
+  accounts:
+    enabled: false
+    tag: master
+    serviceType: ClusterIP
+    ingress: true     
+    debugMode: false
+    configurationPath: /configuration  
+  binlogDbSync:
+    enabled: false
+    tag: master
+    serviceType: ClusterIP
+    ingress: false   
+    debugMode: false
+    configurationPath: /configuration      
+  comments:
+    enabled: false
+    tag: master
+    serviceType: ClusterIP
+    ingress: true     
+    debugMode: false
+    configurationPath: /configuration       
+  dictionaries:
+    enabled: false
+    tag: master
+    serviceType: ClusterIP
+    ingress: true     
+    debugMode: false
+    configurationPath: /configuration 
+  fakeSessions:
+    enabled: false
+    tag: master
+    serviceType: ClusterIP
+    ingress: true     
+    debugMode: false
+    configurationPath: /configuration  
+  sampleChat:
+    enabled: false
+    tag: master
+    serviceType: ClusterIP
+    ingress: true     
+    debugMode: false
+    configurationPath: /data/configuration       
+  sreApiV3:
+    enabled: false
+    tag: master
+    serviceType: NodePort
+    ingress: true
+    debugMode: false
+    configurationPath: /configuration   
+  webSockets:
+    enabled: false
+    tag: master
+    serviceType: ClusterIP
+    ingress: true     
+    debugMode: false
+    configurationPath: /configuration

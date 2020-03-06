@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "api-v3.fullname" . }}-dictionaries-config
+  labels:
+    app: {{ template "api-v3.name" . }}
+    chart: {{ template "api-v3.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+data:
+  config.yaml: |
+    port: 80
+    version: {{ $.Values.servicesSettings.dictionaries.tag }}
+
+    reqGuidHeader: request-id
+    defaultLimit: 100
+
+    logSettings:
+      level: {{ $.Values.commonSettings.logsLevel }}
+      format: {{ $.Values.commonSettings.logsFormat }} # 1 - simple, 2 - json
+      colorize: false
+
+    dbSettings:
+      host: {{ $.Values.dbSettings.host }}
+      user:  {{ $.Values.dbSettings.user }}
+      password: {{ $.Values.dbSettings.password }}
+      port: 3306
+      connectionLimit: {{ $.Values.commonSettings.connectionLimit }}
+
+    relationships:
+      -
+        name: dictionaries
+        table: {{ $.Values.dbTables.dictionaries.mainTable }}
+
+    resources:
+      -
+        name: dictionaries
+        prefix: dictionaries
+        methods: [ GET, POST ]
+        tables:
+          mainTable: {{ $.Values.dbTables.dictionaries.mainTable }}
+          actionTable: {{ $.Values.dbTables.dictionaries.actionTable }}

@@ -1,0 +1,96 @@
+{{- $fullName := include "api-v3.fullname" . -}}
+{{- $name := include "api-v3.name" . -}}
+{{- $chart := include "api-v3.chart" . -}}
+
+{{- range .Values.services }}
+{{- if .enabled }}
+apiVersion: {{ $.Values.commonSettings.apiVersion }}
+kind: Deployment
+metadata:
+  name: api-v3-{{ .name }}
+  labels:
+    app: {{ $fullName }}
+    chart: {{ $chart }}
+    release: {{ $.Release.Name }}
+    heritage: {{ $.Release.Service }}
+spec:
+  replicas: {{ .replicaCount }}
+  selector:
+    matchLabels:
+      app: api-v3-{{ .name }}
+      release: {{ $.Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: api-v3-{{ .name }}
+        release: {{ $.Release.Name }}
+    spec:
+      imagePullSecrets:
+        - name: regcred
+      volumes:
+        - name: {{ $fullName }}-{{ .name }}-config
+          configMap:
+            name: {{ $fullName }}-{{ .name }}-config
+        {{- if .awsCredentials }} 
+        - name: {{ $fullName }}-aws-credentials
+          configMap:
+            name: {{ $fullName }}-aws-credentials
+        {{- end }}   
+      containers:
+        - name: {{ .name }}
+          image: {{ $.Values.repository }}:{{ .image.tag }}
+          imagePullPolicy: {{ .image.pullPolicy }}
+          {{- if .debugMode }}
+          command: [ "/bin/sh", "-ce", "tail -f /dev/null" ]
+          {{- end }}
+          volumeMounts:
+            - name: {{ $fullName }}-{{ .name }}-config
+              mountPath: /usr/src/app{{ .configurationPath }}
+            {{- if .awsCredentials }} 
+            - name: {{ $fullName }}-aws-credentials
+              mountPath: /root/.aws
+            {{- end }}  
+          env:
+            - name: VALUES_HASH
+              value: {{ $.Values.valuesHash }}
+           {{- range $key, $var := .image.env }}
+            - name: {{ $key | quote }}
+              value: {{ $var | quote }}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          {{- $sname := .name -}}
+          {{- if has $sname $.Values.commonSettings.withTcpChecks }}
+          readinessProbe:
+            tcpSocket:
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 60
+          {{- else if has $sname $.Values.commonSettings.withoutChecks }}
+          {{- else }}
+          readinessProbe:
+            httpGet:
+              path: {{ $sname }}/healthcheck
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 60
+          {{- end }}
+          resources:
+{{ toYaml .resources | indent 12 }}
+    {{- with .nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+---
+{{- end }}
+{{- end }}

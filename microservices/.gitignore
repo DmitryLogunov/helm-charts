@@ -1,0 +1,5 @@
+secret-values.yaml
+secret-values.*.yaml
+*.secret-values.yaml
+values.local.yaml
+values.yaml

@@ -1,0 +1,46 @@
+{{- $fullName := include "api-v3.fullname" . -}}
+{{- $name := include "api-v3.name" . -}}
+{{- $chart := include "api-v3.chart" . -}}
+{{- $baseDomain := .Values.commonSettings.baseDomain -}}
+
+{{- range .Values.services }}
+{{- if .ingress.enabled -}}
+{{- $ingressPath := .ingress.path -}}
+{{- $ingressPefix := .ingress.prefix -}}
+{{- $serviceName :=  printf "%s-%s" "api-v3" .name -}}
+{{- $host :=  printf "%s.%s" .ingress.prefix $baseDomain -}}
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: {{ .name }}
+  labels:
+    app: {{ $name }}
+    chart: {{ $chart }}
+    release: {{ $.Release.Name }}
+    heritage: {{ $.Release.Service }}
+{{- with .ingress.annotations }}
+  annotations:
+{{ toYaml . | indent 4 }}
+{{- end }}
+spec:
+{{- if .ingress.tls }}
+  tls:
+  {{- range .ingress.tls }}
+    - hosts:
+      {{- range .hosts }}
+        - {{ . }}
+      {{- end }}
+      secretName: {{ .secretName }}
+  {{- end }}
+{{- end }}
+  rules:
+    - host: {{ $host }}
+      http:
+        paths:
+          - path: {{ $ingressPath }}
+            backend:
+              serviceName: {{ $serviceName }}
+              servicePort: http
+---  
+{{- end }}
+{{- end }}   

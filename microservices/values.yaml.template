@@ -1,0 +1,300 @@
+commonSettings:
+  apiVersion: {:commonSettings_apiVersion:}
+  baseDomain: {:commonSettings_baseDomain:}
+  logsLevel: {:commonSettings_logsLevel:}
+  logsFormat: {:commonSettings_logsFormat:}
+  sreApiV3Url: {:commonSettings_sreApiV3Url:} 
+  cookieName: {:commonSettings_cookieName:}
+  usersip: {:commonSettings_usersip:}
+  authorization: {:commonSettings_authorization:}
+  connectionLimit: {:commonSettings_connectionLimit:}
+  withTcpChecks:
+    - web-sockets
+    - rpc-server
+    - sre-api-v3
+  withoutChecks:
+    - binlog-db-sync
+
+awsLambda:
+  impdb:
+    customer:
+      url: ''
+
+servicesSettings:
+  accounts:
+    enabled: &accountsEnabled {:servicesSettings_accounts_enabled:}
+    tag: &accountsTag {:servicesSettings_accounts_tag:}
+    serviceType: &accountsServiceType {:servicesSettings_accounts_serviceType:}
+    ingress: &accountsIngress {:servicesSettings_accounts_ingress:}    
+    debugMode: &accountsDebugMode {:servicesSettings_accounts_debugMode:}
+    configurationPath: &accountsConfigurationPath {:servicesSettings_accounts_configurationPath:}
+  binlogDbSync:
+    enabled: &binlogDbSyncEnabled {:servicesSettings_binlogDbSync_enabled:}
+    tag: &binlog-db-syncTag {:servicesSettings_binlogDbSync_tag:}
+    serviceType: &binlogDbSyncServiceType {:servicesSettings_binlogDbSync_serviceType:}
+    ingress: &binlogDbSyncIngress {:servicesSettings_binlogDbSync_ingress:}
+    debugMode: &binlogDbSyncDebugMode {:servicesSettings_binlogDbSync_debugMode:}
+    configurationPath: &binlogDbSyncConfigurationPath {:servicesSettings_binlogDbSync_configurationPath:}
+  comments:
+    enabled: &commentsEnabled {:servicesSettings_comments_enabled:}
+    tag: &commentsTag {:servicesSettings_comments_tag:}
+    serviceType: &commentsServiceType {:servicesSettings_comments_serviceType:}
+    ingress: &commentsIngress {:servicesSettings_comments_ingress:}
+    debugMode: &commentsDebugMode {:servicesSettings_comments_debugMode:}
+    configurationPath: &commentsConfigurationPath {:servicesSettings_comments_configurationPath:}
+  dictionaries:
+    enabled: &dictionariesEnabled {:servicesSettings_dictionaries_enabled:}
+    tag: &dictionariesTag {:servicesSettings_dictionaries_tag:}
+    serviceType: &dictionariesServiceType {:servicesSettings_dictionaries_serviceType:}
+    ingress: &dictionariesIngress {:servicesSettings_dictionaries_ingress:}
+    debugMode: &dictionariesDebugMode {:servicesSettings_dictionaries_debugMode:}
+    configurationPath: &dictionariesConfigurationPath {:servicesSettings_dictionaries_configurationPath:}
+  fakeSessions:
+    enabled: &fakeSessionsEnabled {:servicesSettings_fakeSessions_enabled:}
+    tag: &fakeSessionsTag {:servicesSettings_fakeSessions_tag:} 
+    serviceType: &fakeSessionsServiceType {:servicesSettings_fakeSessions_serviceType:}
+    ingress: &fakeSessionsIngress {:servicesSettings_fakeSessions_ingress:}
+    debugMode: &fakeSessionsDebugMode {:servicesSettings_fakeSessions_debugMode:}
+    configurationPath: &fakeSessionsConfigurationPath {:servicesSettings_fakeSessions_configurationPath:}
+  sampleChat:
+    enabled: &sampleChatEnabled {:servicesSettings_sampleChat_enabled:}
+    tag: &sampleChatTag {:servicesSettings_sampleChat_tag:}
+    serviceType: &sampleChatServiceType {:servicesSettings_sampleChat_serviceType:}
+    ingress: &sampleChatIngress {:servicesSettings_sampleChat_ingress:}
+    debugMode: &sampleChatDebugMode {:servicesSettings_sampleChat_debugMode:}
+    configurationPath: &sampleChatConfigurationPath {:servicesSettings_sampleChat_configurationPath:} 
+  sreApiV3:
+    enabled: &sreApiV3Enabled {:servicesSettings_sreApiV3_enabled:}
+    tag: &sre-api-v3Tag {:servicesSettings_sreApiV3_tag:}
+    serviceType: &sreApiV3ServiceType {:servicesSettings_sreApiV3_serviceType:}
+    ingress: &sreApiV3Ingress {:servicesSettings_sreApiV3_ingress:}
+    debugMode: &sreApiV3DebugMode {:servicesSettings_sreApiV3_debugMode:}
+    configurationPath: &sreApiV3ConfigurationPath {:servicesSettings_sreApiV3_configurationPath:}
+  webSockets:
+    enabled: &webSocketsEnabled {:servicesSettings_webSockets_enabled:}
+    tag: &web-socketsTag {:servicesSettings_webSockets_tag:}
+    serviceType: &webSocketsServiceType {:servicesSettings_webSockets_serviceType:}
+    ingress: &webSocketsIngress {:servicesSettings_webSockets_ingress:}
+    debugMode: &webSocketsDebugMode {:servicesSettings_webSockets_debugMode:}
+    configurationPath: &webSocketsConfigurationPath {:servicesSettings_webSockets_configurationPath:}   
+
+services:
+  - name: accounts
+    enabled: *accountsEnabled
+    debugMode: *accountsDebugMode    
+    replicaCount: 1
+    image:
+      tag: *accountsTag
+      pullPolicy: IfNotPresent
+      env:
+        CONFIGURATION_PATH: *accountsConfigurationPath
+    configurationPath: *accountsConfigurationPath   
+    service:
+      type: *accountsServiceType
+      port: 80
+    ingress:
+      enabled: *accountsIngress
+      prefix: accounts
+      annotations: {}
+      path: /
+      tls: []
+    resources: {}
+    nodeSelector: {}
+    tolerations: []
+    affinity: {}     
+
+  - name: binlog-db-sync
+    enabled: *binlogDbSyncEnabled
+    debugMode: *binlogDbSyncDebugMode
+    awsCredentials: true
+    replicaCount: 1
+    image:
+      tag: *binlog-db-syncTag
+      pullPolicy: IfNotPresent
+      env:
+        CONFIGURATION_PATH: *binlogDbSyncConfigurationPath
+        ROOT_PATH: /usr/src/app
+    configurationPath: *binlogDbSyncConfigurationPath
+    service:
+      type: *binlogDbSyncServiceType
+      port: 80
+    ingress:
+      enabled: *binlogDbSyncIngress
+      prefix: binlog-db-sync
+      annotations: {}
+      path: /
+      tls: []
+    resources: {}
+    nodeSelector: {}
+    tolerations: []
+    affinity: {}     
+
+  - name: comments
+    enabled: *commentsEnabled
+    debugMode: *commentsDebugMode
+    replicaCount: 1
+    image:
+      tag: *commentsTag
+      pullPolicy: IfNotPresent
+      env:
+        CONFIGURATION_PATH: *commentsConfigurationPath
+    configurationPath: *commentsConfigurationPath
+    service:
+      type: *commentsServiceType
+      port: 80
+    ingress:
+      enabled: *commentsIngress
+      prefix: comments
+      annotations: {}
+      path: /
+      tls: []
+    resources: {}
+    nodeSelector: {}
+    tolerations: []
+    affinity: {}
+
+  - name: dictionaries
+    enabled: *dictionariesEnabled
+    debugMode: *dictionariesDebugMode      
+    replicaCount: 1
+    image:
+      tag: *dictionariesTag
+      pullPolicy: IfNotPresent
+      env:
+        CONFIGURATION_PATH: *dictionariesConfigurationPath
+    configurationPath: *dictionariesConfigurationPath
+    service:
+      type: *dictionariesServiceType
+      port: 80
+    ingress:
+      enabled: *dictionariesIngress
+      prefix: dictionaries
+      annotations: {}
+      path: /
+      tls: []
+    resources: {}
+    nodeSelector: {}
+    tolerations: []
+    affinity: {} 
+
+  - name: sre-api-v3
+    enabled: *sreApiV3Enabled
+    debugMode: *sreApiV3DebugMode
+    replicaCount: 1
+    image:
+      tag: *sre-api-v3Tag
+      pullPolicy: IfNotPresent
+      env:
+        CONFIGURATION_PATH: *sreApiV3ConfigurationPath
+    configurationPath: *sreApiV3ConfigurationPath    
+    service: 
+      type: *sreApiV3ServiceType
+      port: 80
+    ingress:
+      enabled: *sreApiV3Ingress
+      prefix: sre-api-v3
+      annotations: {}
+      path: /
+      tls: []
+    resources: {}
+    nodeSelector: {}
+    tolerations: []
+    affinity: {} 
+
+  - name: fake-sessions
+    enabled: *fakeSessionsEnabled
+    debugMode: *fakeSessionsDebugMode
+    replicaCount: 1
+    image:
+      tag: *fakeSessionsTag
+      pullPolicy: IfNotPresent
+      env:
+        CONFIGURATION_PATH: *fakeSessionsConfigurationPath
+    configurationPath: *fakeSessionsConfigurationPath
+    service:
+      type: *fakeSessionsServiceType
+      port: 80
+    ingress:
+      enabled: *fakeSessionsIngress
+      prefix: fake-sessions
+      annotations: {}
+      path: /
+      tls: []
+    resources: {}
+    nodeSelector: {}
+    tolerations: []
+    affinity: {}  
+
+  - name: sample-chat
+    enabled: *sampleChatEnabled
+    debugMode: *sampleChatDebugMode
+    replicaCount: 1
+    image:
+      tag: *sampleChatTag
+      pullPolicy: IfNotPresent
+      env:
+        CONFIGURATION_PATH: *sampleChatConfigurationPath
+        SERVER_PORT: 80
+    configurationPath: *sampleChatConfigurationPath
+    service:
+      type: *sampleChatServiceType
+      port: 80
+    ingress:
+      enabled: *sampleChatIngress
+      prefix: sample-chat
+      annotations: {}
+      path: /
+      tls: []
+    resources: {}
+    nodeSelector: {}
+    tolerations: []
+    affinity: {}
+
+  - name: web-sockets
+    enabled: *webSocketsEnabled
+    debugMode: *webSocketsDebugMode
+    replicaCount: 1
+    image:
+      tag: *web-socketsTag
+      pullPolicy: IfNotPresent
+      env:
+        CONFIGURATION_PATH: *webSocketsConfigurationPath
+    configurationPath: *webSocketsConfigurationPath
+    service:
+      type: *webSocketsServiceType
+      port: 80
+    ingress:
+      enabled: *webSocketsIngress
+      prefix: web-sockets
+      annotations: {}
+      path: /
+      tls: []
+    resources: {}
+    nodeSelector: {}
+    tolerations: []
+    affinity: {}   
+
+# DATABASE TABLES
+dbTables:
+  accounts:
+    mainTable: 'rcsredb.accounts'
+    actionTable: 'rccmrdb.user'
+    relationshipsTables:
+      accounts_has_clusters: 'rcsredb.accounts_has_clusters'
+      accounts_has_memberships: 'rcsredb.accounts_has_memberships'
+      accounts_has_roles: 'rcsredb.accounts_has_roles'
+  dictionaries:
+    mainTable: 'rcsredb.dictionaries'
+    actionTable: 'rcsredb.dictionaries'
+  cmpDepartments:
+    mainTable: 'rccmrdb.department'    
+  impdbCustomers:
+    mainTable: 'impdb.customer'   
+  cmpPartners:
+    mainTable: 'rccmrdb.partner' 
+  cmpUsers:
+    mainTable: rccmrdb.user
+  comments:
+    mainTable: 'rcsredb.comments'
+    actionTable: 'rcsredb.comments'   
+

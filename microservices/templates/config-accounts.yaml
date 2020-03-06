@@ -1,0 +1,115 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "api-v3.fullname" . }}-accounts-config
+  labels:
+    app: {{ template "api-v3.name" . }}
+    chart: {{ template "api-v3.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+data:
+  config.yaml: |
+    port: 80
+    version: {{ $.Values.servicesSettings.accounts.tag }}
+    resource: 'accounts'
+
+    reqGuidHeader: 'request-id'
+    defaultLimit: 100
+
+    logSettings:
+      level: {{ $.Values.commonSettings.logsLevel }}
+      format: {{ $.Values.commonSettings.logsFormat }} # 1 - simple, 2 - json
+      transports: 'console'
+      colorize: true
+
+    dbSettings:
+      host: {{ $.Values.dbSettings.host }}
+      user:  {{ $.Values.dbSettings.user }}
+      password: {{ $.Values.dbSettings.password }}
+      port: '3306'
+      connectionLimit: {{ $.Values.commonSettings.connectionLimit }}
+
+    dbTables:
+      - 
+        name: 'accounts'
+        table: '{{ $.Values.dbTables.accounts.mainTable }}'  
+      - 
+        name: 'accounts_has_roles'
+        table: '{{ $.Values.dbTables.accounts.relationshipsTables.accounts_has_roles }}' 
+      - 
+        name: 'accounts_has_memberships'    
+        table: '{{ $.Values.dbTables.accounts.relationshipsTables.accounts_has_memberships }}'         
+      - 
+        name: 'accounts_has_clusters'
+        table: '{{ $.Values.dbTables.accounts.relationshipsTables.accounts_has_clusters }}'     
+      -
+        name: 'dictionaries'
+        table: '{{ $.Values.dbTables.dictionaries.mainTable }}'
+      -
+        name: 'roles'
+        table: '{{ $.Values.dbTables.roles.mainTable }}' 
+
+    actionTables:  
+      cmpDepartments: '{{ $.Values.dbTables.cmpDepartments.mainTable }}'
+      cmpPartners: '{{ $.Values.dbTables.cmpPartners.mainTable }}'
+      cmpUsers: '{{ $.Values.dbTables.cmpUsers.mainTable }}'
+      dictionaries: '{{ $.Values.dbTables.dictionaries.mainTable }}'     
+      impdbCustomers: '{{ $.Values.dbTables.impdbCustomers.mainTable }}'    
+
+    resources:
+      -
+        name: accounts
+        prefix: accounts
+        methods: [ GET, POST, PATCH, DELETE ]
+        tables:
+          mainTable: {{ $.Values.dbTables.accounts.mainTable }}
+        addOneToManyRelationshipsToResponse: true  
+        relationships:
+          -
+            name: type
+            type: oneToOne
+            referenceTableAlias: type
+            relationshipResource: dictionaries
+            relationshipsReferenceDBTableColumns: 
+              resourceIdColumn: id
+              contextIdColumn: account_type_id
+            methods: [ GET ]   
+          -
+            name: created_by
+            type: oneToOne
+            referenceTableAlias: created_by
+            relationshipResource: accounts
+            relationshipsReferenceDBTableColumns: 
+              resourceIdColumn: id
+              contextIdColumn: created_by
+            methods: [ GET ]  
+          -
+            name: updated_by
+            type: oneToOne
+            referenceTableAlias: updated_by
+            relationshipResource: accounts
+            relationshipsReferenceDBTableColumns: 
+              resourceIdColumn: id
+              contextIdColumn: updated_by
+            methods: [ GET ]         
+          -
+            name: roles
+            type: oneToMany
+            referenceTableAlias: accounts_has_roles        
+            relationshipResource: roles   
+            roleKey: ACCOUNT_HAS_ROLE    
+            methods: [ GET, POST, DELETE ]
+          -
+            name: memberships
+            type: oneToMany
+            referenceTableAlias: accounts_has_memberships        
+            relationshipResource: accounts
+            roleKey: ACCOUNT_BELONGS_TO_MEMBERSHIP
+            methods: [ GET, POST, DELETE ]
+          -
+            name: clusters
+            type: oneToMany
+            referenceTableAlias: accounts_has_clusters        
+            relationshipResource: clusters
+            roleKey: ACCOUNT_RELATES_TO_CLUSTER
+            methods: [ GET, POST, DELETE ]
