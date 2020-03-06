@@ -1,4 +1,4 @@
-# SRE API v3 Helm chart
+# The template of Helm chart for microservices architecture application
 
 ## Requirements
 
